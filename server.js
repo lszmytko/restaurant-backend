@@ -9,7 +9,7 @@ const cookieParser = require("cookie-parser");
 
 const PORT = 4000;
 
-app.use(allowCrossDomain)
+// app.use(allowCrossDomain)
 app.use(
   cors({
     origin: "*",
