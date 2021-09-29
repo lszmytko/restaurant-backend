@@ -104,7 +104,7 @@ const handleLogin = async (req, res) => {
     const userDetails = await client.query(text, values);
 
     if (!userDetails.rows[0]) {
-      res.json({ message: "User does not exist", userExists:false });
+      res.json({ message: "User does not exist", userExists:false, details:{} });
     }
 
     const { id, name, lastname, street, flatnumber, phone } =
