@@ -94,6 +94,7 @@ const handleRegister = async (req, res) => {
     }
   } catch (error) {
     res.status(403).send("Coś nie tak");
+    console.log(error);
   }
 };
 
