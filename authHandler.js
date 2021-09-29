@@ -91,7 +91,7 @@ const handleRegister = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(404).send("Coś nie tak");
+    res.status(403).send("Coś nie tak");
   }
 };
 
@@ -104,7 +104,11 @@ const handleLogin = async (req, res) => {
     const userDetails = await client.query(text, values);
 
     if (!userDetails.rows[0]) {
-      res.json({ message: "User does not exist", userExists:false, details:{} });
+      res.json({
+        message: "User does not exist",
+        userExists: false,
+        details: {},
+      });
     }
 
     const { id, name, lastname, street, flatnumber, phone } =
@@ -130,13 +134,13 @@ const handleLogin = async (req, res) => {
             token,
             maxAge: maxAge * 1000,
           },
-          userExists: true
+          userExists: true,
         });
       } else if (!auth) {
         res.json({
           message: "wrong password",
           details: {},
-          userExists: true
+          userExists: true,
         });
       }
     }
