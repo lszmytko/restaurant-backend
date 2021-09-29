@@ -53,7 +53,9 @@ const handleRegister = async (req, res) => {
     values: [email],
   };
   try {
+    console.log("przeszlo1");
     let verifiedEmail = await client.query(query);
+    console.log("przeszlo2");
     if (verifiedEmail.rows[0]) {
       const answer = await res.json({
         ifEmailExists: true,
