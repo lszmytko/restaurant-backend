@@ -91,7 +91,7 @@ const handleRegister = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(404).send(error);
+    res.status(404).send("Coś nie tak");
   }
 };
 
