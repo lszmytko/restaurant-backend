@@ -9,26 +9,6 @@ const cookieParser = require("cookie-parser");
 
 const PORT = 4000;
 
-//Create connection
-
-// const db = mysql.createConnection({
-//   host: "us-cdbr-east-04.cleardb.com",
-//   user: "b196f3d2f77f9c",
-//   password: "42d5ea2e",
-//   database: "heroku_c9d07ec47defe69",
-// });
-
-//b196f3d2f77f9c:42d5ea2e@us-cdbr-east-04.cleardb.com/heroku_c9d07ec47defe69?reconnect=true
-
-// Connect
-
-// db.connect((err) => {
-//   if (err) {
-//     throw err;
-//   }
-//   console.log("mysql connected");
-// });
-
 app.use(
   cors({
     origin: "*",
@@ -40,25 +20,25 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(function (req, res, next) {
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.header("Access-Control-Allow-Credentials", true);
-//   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin,X-Requested-With,Content-Type,Accept,content-type,application/json"
-//   );
-//   next();
-// });
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", true);
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin,X-Requested-With,Content-Type,Accept,content-type,application/json"
+  );
+  next();
+});
 
-// app.post("/users/register", async (req, res) => {
-//   console.log("poszlo");
-//   handleRegister(req, res);
-// });
+app.post("/users/register", async (req, res) => {
+  console.log("poszlo");
+  handleRegister(req, res);
+});
 
-// app.post("/users/login", async (req, res) => {
-//   handleLogin(req, res);
-// });
+app.post("/users/login", async (req, res) => {
+  handleLogin(req, res);
+});
 
 app.get("/", async (req, res) => {
   const query = {
@@ -78,65 +58,65 @@ app.get("/", async (req, res) => {
   }
 });
 
-// app.post("/placeOrder", requireAuth, (req, res) => {
-//   console.log("body", req.body);
-//   const { dishes, price, customer_id } = req.body;
-//   const dishesToAdd = JSON.stringify(dishes);
-//   const query = {
-//     text: "INSERT INTO orders (dishes, price, customer_id, date) VALUES($1, $2, $3, $4)",
-//     values: [dishesToAdd, price, customer_id, new Date()],
-//   };
-//   try {
-//     client.query(query);
-//     return res.json({
-//       success: true,
-//     });
-//   } catch (error) {
-//     return res.json({
-//       success: false,
-//     });
-//   }
-// });
+app.post("/placeOrder", requireAuth, (req, res) => {
+  console.log("body", req.body);
+  const { dishes, price, customer_id } = req.body;
+  const dishesToAdd = JSON.stringify(dishes);
+  const query = {
+    text: "INSERT INTO orders (dishes, price, customer_id, date) VALUES($1, $2, $3, $4)",
+    values: [dishesToAdd, price, customer_id, new Date()],
+  };
+  try {
+    client.query(query);
+    return res.json({
+      success: true,
+    });
+  } catch (error) {
+    return res.json({
+      success: false,
+    });
+  }
+});
 
-// app.post("/history", requireAuth, async (req, res) => {
-//   const { id } = req.body;
-//   console.log("id", id);
-//   console.log("body", req.body);
-//   const query = {
-//     text: "SELECT * from orders where customer_id = $1",
-//     values: [id],
-//   };
-//   try {
-//     const response = await client.query(query);
-//     console.log("responseeee", response.rows);
-//     res.json({
-//       message: response.rows,
-//     });
-//   } catch (e) {
-//     console.log("błąd");
-//     res.json({
-//       details: "error",
-//     });
-//   }
-// });
+app.post("/history", requireAuth, async (req, res) => {
+  const { id } = req.body;
+  console.log("id", id);
+  console.log("body", req.body);
+  const query = {
+    text: "SELECT * from orders where customer_id = $1",
+    values: [id],
+  };
+  try {
+    const response = await client.query(query);
+    console.log("responseeee", response.rows);
+    res.json({
+      message: response.rows,
+    });
+  } catch (e) {
+    console.log("błąd");
+    res.json({
+      details: "error",
+    });
+  }
+});
 
-// app.put("/update/:id", async (req, res) => {
-//   const id = req.params.id;
-//   console.log("body", req.body);
-//   const { name, lastName, street, flatNumber, phone } = req.body;
-//   const query = {
-//     text: "UPDATE sklepusers SET name = $1, lastName = $2, street = $3, flatNumber = $4, phone = $5 where id = $6",
-//     values: [name, lastName, street, flatNumber, phone, id],
-//   };
-//   try {
-//     const userExisting = await client.query(query);
-//     res.json({
-//       success: true,
-//     });
-//   } catch (e) {
-//     console.log(e);
-//   }
-// });
+app.put("/update/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log("body", req.body);
+  const { name, lastName, street, flatNumber, phone } = req.body;
+  const query = {
+    text: "UPDATE sklepusers SET name = $1, lastName = $2, street = $3, flatNumber = $4, phone = $5 where id = $6",
+    values: [name, lastName, street, flatNumber, phone, id],
+  };
+  try {
+    const userExisting = await client.query(query);
+    res.json({
+      success: true,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+});
 
 app.listen(process.env.PORT || PORT, () => {
   console.log("Serwer działa");
