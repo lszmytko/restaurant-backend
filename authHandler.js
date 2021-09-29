@@ -104,7 +104,7 @@ const handleLogin = async (req, res) => {
     const userDetails = await client.query(text, values);
 
     if (!userDetails.rows[0]) {
-      res.json({ message: "User does not exist" });
+      res.json({ message: "User does not exist", userExists:false });
     }
 
     const { id, name, lastname, street, flatnumber, phone } =
@@ -130,11 +130,13 @@ const handleLogin = async (req, res) => {
             token,
             maxAge: maxAge * 1000,
           },
+          userExists: true
         });
       } else if (!auth) {
         res.json({
           message: "wrong password",
           details: {},
+          userExists: true
         });
       }
     }
