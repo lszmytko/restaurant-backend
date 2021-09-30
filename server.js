@@ -26,7 +26,6 @@ app.use(function (req, res, next) {
 });
 
 app.post("/users/register", async (req, res) => {
-  console.log("poszlo");
   handleRegister(req, res);
 });
 
