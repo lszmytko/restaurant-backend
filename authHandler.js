@@ -154,4 +154,24 @@ const handleLogin = async (req, res) => {
   }
 };
 
+const handlePlaceOrder = async (req, res) => {
+  console.log("body", req.body);
+  const { dishes, price, customer_id, date } = req.body;
+  const dishesToAdd = JSON.stringify(dishes);
+  const query = {
+    text: "INSERT INTO orders (dishes, price, customer_id, date) VALUES($1, $2, $3, $4)",
+    values: [dishesToAdd, price, customer_id, date],
+  };
+  try {
+    client.query(query);
+    return res.json({
+      success: true,
+    });
+  } catch (error) {
+    return res.json({
+      success: false,
+    });
+  }
+};
+
 module.exports = { handleRegister, handleLogin, requireAuth };

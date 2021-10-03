@@ -4,7 +4,12 @@ const app = express();
 const cors = require("cors");
 const { client } = require("./dbConfig");
 const bcrypt = require("bcryptjs");
-const { handleRegister, handleLogin, requireAuth } = require("./authHandler");
+const {
+  handleRegister,
+  handleLogin,
+  requireAuth,
+  handlePlaceOrder,
+} = require("./authHandler");
 const cookieParser = require("cookie-parser");
 
 const PORT = 4000;
@@ -34,10 +39,6 @@ app.post("/users/login", async (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  const query = {
-    text: "SELECT * from sklepusers",
-  };
-
   try {
     const response = await client.query(query);
     console.log("response", response);
@@ -52,23 +53,23 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/placeOrder", requireAuth, (req, res) => {
-  console.log("body", req.body);
-  const { dishes, price, customer_id, date } = req.body;
-  const dishesToAdd = JSON.stringify(dishes);
-  const query = {
-    text: "INSERT INTO orders (dishes, price, customer_id, date) VALUES($1, $2, $3, $4)",
-    values: [dishesToAdd, price, customer_id, date],
-  };
-  try {
-    client.query(query);
-    return res.json({
-      success: true,
-    });
-  } catch (error) {
-    return res.json({
-      success: false,
-    });
-  }
+  // console.log("body", req.body);
+  // const { dishes, price, customer_id, date } = req.body;
+  // const dishesToAdd = JSON.stringify(dishes);
+  // const query = {
+  //   text: "INSERT INTO orders (dishes, price, customer_id, date) VALUES($1, $2, $3, $4)",
+  //   values: [dishesToAdd, price, customer_id, date],
+  // };
+  // try {
+  //   client.query(query);
+  //   return res.json({
+  //     success: true,
+  //   });
+  // } catch (error) {
+  //   return res.json({
+  //     success: false,
+  //   });
+  // }
 });
 
 app.post("/history", requireAuth, async (req, res) => {
