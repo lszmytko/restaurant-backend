@@ -1,16 +1,15 @@
-const { urlencoded } = require("express");
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { client } = require("./dbConfig");
-const bcrypt = require("bcryptjs");
-const {
-  handleRegister,
-  handleLogin,
-  requireAuth,
-  handlePlaceOrder,
-} = require("./authHandler");
 const cookieParser = require("cookie-parser");
+
+const { handleRegister, handleLogin, requireAuth } = require("./authHandler");
+const {
+  handleUpdate,
+  handleCheckDB,
+  handlePlaceOrder,
+  handleShowHistory,
+} = require("./handlers");
 
 const PORT = 4000;
 
@@ -30,88 +29,18 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.post("/users/register", async (req, res) => {
-  handleRegister(req, res);
-});
+app.post("/users/register", handleRegister);
 
-app.post("/users/login", async (req, res) => {
-  handleLogin(req, res);
-});
+app.post("/users/login", handleLogin);
 
-app.get("/", async (req, res) => {
-  try {
-    const response = await client.query(query);
-    console.log("response", response);
-    return res.send({
-      success: true,
-    });
-  } catch (error) {
-    return res.send({
-      success: false,
-    });
-  }
-});
+app.get("/", handleCheckDB);
 
-app.post("/placeOrder", requireAuth, (req, res) => {
-  // console.log("body", req.body);
-  // const { dishes, price, customer_id, date } = req.body;
-  // const dishesToAdd = JSON.stringify(dishes);
-  // const query = {
-  //   text: "INSERT INTO orders (dishes, price, customer_id, date) VALUES($1, $2, $3, $4)",
-  //   values: [dishesToAdd, price, customer_id, date],
-  // };
-  // try {
-  //   client.query(query);
-  //   return res.json({
-  //     success: true,
-  //   });
-  // } catch (error) {
-  //   return res.json({
-  //     success: false,
-  //   });
-  // }
-});
+app.post("/placeOrder", requireAuth, handlePlaceOrder);
 
-app.post("/history", requireAuth, async (req, res) => {
-  const { id } = req.body;
-  console.log("id", id);
-  console.log("body", req.body);
-  const query = {
-    text: "SELECT * from orders where customer_id = $1",
-    values: [id],
-  };
-  try {
-    const response = await client.query(query);
-    console.log("responseeee", response.rows);
-    res.json({
-      message: response.rows,
-    });
-  } catch (e) {
-    console.log("błąd");
-    res.json({
-      details: "error",
-    });
-  }
-});
+app.post("/history", requireAuth, handleShowHistory);
 
-app.put("/update/:id", async (req, res) => {
-  const id = req.params.id;
-  console.log("body", req.body);
-  const { name, lastName, street, flatNumber, phone } = req.body;
-  const query = {
-    text: "UPDATE sklepusers SET name = $1, lastName = $2, street = $3, flatNumber = $4, phone = $5 where id = $6",
-    values: [name, lastName, street, flatNumber, phone, id],
-  };
-  try {
-    const userExisting = await client.query(query);
-    res.json({
-      success: true,
-    });
-  } catch (e) {
-    console.log(e);
-  }
-});
+app.put("/update/:id", handleUpdate);
 
-app.listen(process.env.PORT || PORT, () => {
-  console.log("Serwer działa");
+app.listen(PORT, () => {
+  console.log("Serwer działa na porcie " + PORT);
 });

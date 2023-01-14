@@ -2,17 +2,6 @@ const { client } = require("./dbConfig");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const verifyEmail = async (email) => {
-  try {
-    let verificationResult = await client.query("SELECT * from sklepusers");
-    res.json({
-      message: "udało się",
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 const maxAge = 3 * 24 * 60 * 60;
 
 const createToken = (id) => {
@@ -23,13 +12,15 @@ const createToken = (id) => {
 const requireAuth = (req, res, next) => {
   const token = req.body.token;
 
-  console.log("tokennnnnnn", req.body);
-
   // ckeck json webtoken exists
 
+  console.log("token is truthy?", token);
+
   if (token) {
+    console.log("jwt", jwt);
     jwt.verify(token, "sklep secret", (err, decodedToken) => {
       if (err) {
+        console.log("preszło tutaj");
         return res.json("user is not logged in");
       } else {
         console.log("decoded", decodedToken);
@@ -53,21 +44,22 @@ const handleRegister = async (req, res) => {
     values: [email],
   };
   try {
-    console.log("przeszlo1");
-    let verifiedEmail = await client.query(query);
-    console.log("przeszlo2");
-    if (verifiedEmail.rows[0]) {
-      const answer = await res.json({
+    // console.log(client);
+    const foundUsers = await client.query(query);
+    const isEmailVerified = foundUsers.rows.length > 0;
+    if (isEmailVerified) {
+      return res.json({
         ifEmailExists: true,
         message: "email already exists",
       });
     }
 
-    if (!verifiedEmail.rows[0]) {
+    if (!isEmailVerified) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
+
       const query = {
-        text: "INSERT INTO sklepusers (name, lastName, email, street, flatNumber, password, phone) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        text: "INSERT INTO sklepusers (name, lastname, email, street, flatnumber, password, phone) VALUES ($1, $2, $3, $4, $5, $6, $7)",
         values: [
           name,
           lastName,
@@ -78,8 +70,9 @@ const handleRegister = async (req, res) => {
           phone,
         ],
       };
+      console.log("przeszlo2", lastName);
 
-      const insertedData = await client.query(query);
+      await client.query(query);
       res.json({
         ifEmailExists: false,
         message: "insert complete",
@@ -104,10 +97,13 @@ const handleLogin = async (req, res) => {
   const values = [email];
 
   try {
-    const userDetails = await client.query(text, values);
+    const foundUsers = await client.query(text, values);
+    const isEmailFound = foundUsers.rows.length > 0;
 
-    if (!userDetails.rows[0]) {
-      res.json({
+    console.log({ password });
+
+    if (!isEmailFound) {
+      return res.json({
         message: "User does not exist",
         userExists: false,
         details: {},
@@ -115,13 +111,16 @@ const handleLogin = async (req, res) => {
     }
 
     const { id, name, lastname, street, flatnumber, phone } =
-      userDetails.rows[0];
-    const databasePassword = userDetails.rows[0].password;
+      foundUsers.rows[0];
+    const databasePassword = foundUsers.rows[0].password;
+    console.log({ databasePassword });
+
     if (databasePassword) {
       const auth = await bcrypt.compare(password, databasePassword);
+      console.log({ auth });
       if (auth) {
-        const token = createToken(userDetails.rows[0].id);
-        console.log(token);
+        const token = createToken(foundUsers.rows[0].id);
+        console.log({ token });
         res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
         res.json({
           message: "correct password",
@@ -139,7 +138,7 @@ const handleLogin = async (req, res) => {
           },
           userExists: true,
         });
-      } else if (!auth) {
+      } else {
         res.json({
           message: "wrong password",
           details: {},
@@ -150,26 +149,6 @@ const handleLogin = async (req, res) => {
   } catch (error) {
     res.json({
       error: "somethiiiing wrong",
-    });
-  }
-};
-
-const handlePlaceOrder = async (req, res) => {
-  console.log("body", req.body);
-  const { dishes, price, customer_id, date } = req.body;
-  const dishesToAdd = JSON.stringify(dishes);
-  const query = {
-    text: "INSERT INTO orders (dishes, price, customer_id, date) VALUES($1, $2, $3, $4)",
-    values: [dishesToAdd, price, customer_id, date],
-  };
-  try {
-    client.query(query);
-    return res.json({
-      success: true,
-    });
-  } catch (error) {
-    return res.json({
-      success: false,
     });
   }
 };
