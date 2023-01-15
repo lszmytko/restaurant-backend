@@ -10,20 +10,16 @@ const createToken = (id) => {
 
 // Middleware checking if user is logged in based on JWT token
 const requireAuth = (req, res, next) => {
-  const token = req.body.token;
+  const token = req.body.token.token;
 
-  // ckeck json webtoken exists
-
-  console.log("token is truthy?", token);
+  console.log({ token });
 
   if (token) {
-    console.log("jwt", jwt);
     jwt.verify(token, "sklep secret", (err, decodedToken) => {
       if (err) {
-        console.log("preszło tutaj");
+        console.log({ decodedToken });
         return res.json("user is not logged in");
       } else {
-        console.log("decoded", decodedToken);
         next();
       }
     });
@@ -44,11 +40,10 @@ const handleRegister = async (req, res) => {
     values: [email],
   };
   try {
-    // console.log(client);
     const foundUsers = await client.query(query);
     const isEmailVerified = foundUsers.rows.length > 0;
     if (isEmailVerified) {
-      return res.json({
+      return res.status(403).json({
         ifEmailExists: true,
         message: "email already exists",
       });
@@ -70,7 +65,6 @@ const handleRegister = async (req, res) => {
           phone,
         ],
       };
-      console.log("przeszlo2", lastName);
 
       await client.query(query);
       res.json({
@@ -87,7 +81,6 @@ const handleRegister = async (req, res) => {
     }
   } catch (error) {
     res.status(403).send("Coś nie tak");
-    console.log(error);
   }
 };
 
@@ -100,8 +93,6 @@ const handleLogin = async (req, res) => {
     const foundUsers = await client.query(text, values);
     const isEmailFound = foundUsers.rows.length > 0;
 
-    console.log({ password });
-
     if (!isEmailFound) {
       return res.json({
         message: "User does not exist",
@@ -110,17 +101,20 @@ const handleLogin = async (req, res) => {
       });
     }
 
-    const { id, name, lastname, street, flatnumber, phone } =
-      foundUsers.rows[0];
-    const databasePassword = foundUsers.rows[0].password;
-    console.log({ databasePassword });
+    const {
+      id,
+      name,
+      lastname,
+      street,
+      flatnumber,
+      phone,
+      password: databasePassword,
+    } = foundUsers.rows[0];
 
     if (databasePassword) {
       const auth = await bcrypt.compare(password, databasePassword);
-      console.log({ auth });
       if (auth) {
-        const token = createToken(foundUsers.rows[0].id);
-        console.log({ token });
+        const token = createToken(id);
         res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
         res.json({
           message: "correct password",
