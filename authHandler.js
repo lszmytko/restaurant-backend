@@ -10,7 +10,7 @@ const createToken = (id) => {
 
 // Middleware checking if user is logged in based on JWT token
 const requireAuth = (req, res, next) => {
-  const token = req.body.token.token;
+  const token = req.body.token;
 
   console.log({ token });
 
