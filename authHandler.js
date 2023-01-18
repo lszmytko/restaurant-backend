@@ -67,6 +67,9 @@ const handleRegister = async (req, res) => {
       };
 
       await client.query(query);
+      const token = createToken(id);
+      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+
       res.json({
         ifEmailExists: false,
         message: "insert complete",
@@ -76,6 +79,10 @@ const handleRegister = async (req, res) => {
           email,
           street,
           flatNumber,
+        },
+        jwtToken: {
+          token,
+          maxAge: maxAge * 1000,
         },
       });
     }

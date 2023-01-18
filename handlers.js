@@ -59,7 +59,7 @@ const handleShowHistory = async (req, res) => {
   try {
     const response = await client.query(query);
     res.json({
-      message: response.rows,
+      orders: response.rows,
     });
   } catch (e) {
     res.json({
