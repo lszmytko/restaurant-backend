@@ -43,7 +43,7 @@ const handleRegister = async (req, res) => {
     const foundUsers = await client.query(query);
     const isEmailVerified = foundUsers.rows.length > 0;
     if (isEmailVerified) {
-      return res.status(403).json({
+      return res.status(400).json({
         ifEmailExists: true,
         message: "email already exists",
       });
@@ -67,8 +67,6 @@ const handleRegister = async (req, res) => {
       };
 
       await client.query(query);
-      const token = createToken(id);
-      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
 
       res.json({
         ifEmailExists: false,
@@ -80,14 +78,10 @@ const handleRegister = async (req, res) => {
           street,
           flatNumber,
         },
-        jwtToken: {
-          token,
-          maxAge: maxAge * 1000,
-        },
       });
     }
   } catch (error) {
-    res.status(403).send("Coś nie tak");
+    res.status(400).send("Coś nie tak");
   }
 };
 
